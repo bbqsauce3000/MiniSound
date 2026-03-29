@@ -1,5 +1,6 @@
 # MiniSound
 
+Note that NumPy is needed, install with `pip install numpy`, then run the example with `python example.py `
 MiniSound is a compact, single‑file audio synthesis and sequencing engine implemented in Python.  
 It provides waveform generation, envelopes, filtering, effects processing, multi‑track scheduling,  
 and WAV export in under 600 lines of code.
