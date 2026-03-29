@@ -1,0 +1,245 @@
+MiniSound Documentation for FL Studio / GUI DAW Users
+====================================================
+THIS DOCUMENTATION IS BEST SUITED FOR THOSE EXPERIENCED WITH PYTHON.
+
+**THIS IS A PYTHON LIBRARY.**
+ 
+MINISOUND WILL NOT BE COHESIVE WITHOUT BASIC PYTHON KNOWLEDGE
+
+also i kinda know nothing about FLStudio, forgive me if some of this is hard to understand
+
+
+MiniSound is a Python-based music engine that works like a text-only DAW. You write musical events in code instead of drawing them in a GUI.
+
+MiniSound is a text-based DAW. If you understand FL Studio and Python, you already
+understand MiniSound. Instead of clicking patterns, drawing notes, and
+routing mixer tracks, you write simple Python commands that describe
+what happens in your song.
+
+This document explains MiniSound using FL Studio concepts so GUI-DAW
+users can work comfortably.
+
+
+------------------------------------------------------------
+1. Core Concepts (FL Studio -> MiniSound)
+------------------------------------------------------------
+
+FL Studio Concept        -> MiniSound Equivalent
+------------------------------------------------------------
+Channel Rack             -> Track
+Pattern                  -> A sequence of note() / chord() / arp() calls
+Playlist                 -> The order events are written in each Track
+Mixer Track              -> Track gain, pan, and send
+Instrument Plugin        -> wave="pulse", "tri", "noise", or layered synths
+Automation               -> Parameters passed per note
+Sends                    -> Track.send (goes to global reverb bus)
+Master FX                -> Song's mastering chain
+
+If you can use FL Studio and Python, you can use MiniSound.
+
+dur=1 means one beat. At 140 BPM, dur=4 is one bar.
+
+To use MiniSound, simply drop minisound.py next to the song, and use
+from minisound import Song
+Then, simply run the song,
+python my_song.py
+This will generate a .wav file.
+------------------------------------------------------------
+2. How a Song Works
+------------------------------------------------------------
+
+A MiniSound song is built from Tracks, just like FL Studio's mixer.
+
+Example:
+
+    song = Song(bpm=140)
+    lead = song.add_track("lead", pan=0.1)
+    bass = song.add_track("bass", pan=-0.1)
+    drums = song.add_track("drums", send=0.4)
+
+Each track schedules musical events:
+
+    lead.note("C5")
+    bass.note("C3", wave="tri")
+    drums.sample("kick.wav")
+
+When you call:
+
+    song.save("out.wav")
+
+MiniSound:
+- Renders each track
+- Mixes them together
+- Applies reverb sends
+- Runs the mastering chain
+- Writes a stereo WAV file
+
+
+------------------------------------------------------------
+3. Notes (Piano Roll -> Code)
+------------------------------------------------------------
+
+Play a note:
+
+    lead.note("C5", dur=1)
+
+"C5" is the note. dur=1 means one beat.
+
+Choose a synth type:
+
+    lead.note("A4", wave="tri")
+    lead.note("G3", wave="noise")
+    lead.note("C5", wave="pulse50")
+
+Add unison (like Sytrus unison):
+
+    lead.note("C5", unison=4, spread=0.03)
+
+Add bitcrush or downsample (like Fruity Squeeze):
+
+    lead.note("C5", bits=6, rate=3)
+
+
+------------------------------------------------------------
+4. Chords (Stacking Notes)
+------------------------------------------------------------
+
+    pad.chord("C4 E4 G4", dur=2, wave="tri")
+
+This is the same as drawing three notes in the Piano Roll.
+
+
+------------------------------------------------------------
+5. Arps (FL Studio Arpeggiator)
+------------------------------------------------------------
+
+    lead.arp("C4 E4 G4", steps=8, dur=0.25)
+
+
+------------------------------------------------------------
+6. Samples (Sampler Channel)
+------------------------------------------------------------
+
+    drums.sample("kick.wav")
+    drums.sample("snare.wav", vol=0.6)
+    drums.sample("hihat.wav", pitch=1.2)
+
+Stretch a sample:
+
+    drums.sample("crash.wav", dur=2.0)
+
+
+------------------------------------------------------------
+7. Mixer Controls (Track Settings)
+------------------------------------------------------------
+
+Track volume:
+
+    lead = song.add_track("lead", gain=0.8)
+
+Track panning:
+
+    pad = song.add_track("pad", pan=-0.2)
+
+Reverb send (like routing to a reverb bus):
+
+    drums = song.add_track("drums", send=0.5)
+
+
+------------------------------------------------------------
+8. Built-In Effects
+------------------------------------------------------------
+
+MiniSound automatically applies:
+
+- ADSR envelopes
+- Vibrato
+- Lowpass filtering
+- Saturation
+- Optional chorus
+- Track echo
+- Global reverb
+- Compression
+- Stereo widening
+- Limiting
+- Tape saturation
+- Oversampling
+
+No plugins required.
+
+
+------------------------------------------------------------
+9. Layering (Like Layer Channel)
+------------------------------------------------------------
+
+You can layer multiple synths inside one note:
+
+    lead.note("C5", layers=[
+        {"wave":"pulse", "vol":1.0, "unison":3},
+        {"wave":"tri",   "vol":0.5, "pan":0.1},
+        {"wave":"noise", "vol":0.2, "bits":6}
+    ])
+
+
+------------------------------------------------------------
+10. Mastering Chain (Master Channel)
+------------------------------------------------------------
+
+MiniSound's master bus includes:
+
+- Tape saturation
+- Oversampling
+- Anti-alias lowpass
+- Soft-knee compression
+- Stereo widening
+- Lookahead limiter
+- Auto gain compensation
+- Master volume trim
+
+You can adjust these:
+
+    song.master_volume_db = -3
+    song.master_saturation_drive = 0.6
+    song.master_target_rms = 0.08
+
+
+------------------------------------------------------------
+11. Exporting
+------------------------------------------------------------
+
+Export your song:
+
+    song.save("mysong.wav")
+
+
+------------------------------------------------------------
+12. Full Example
+------------------------------------------------------------
+
+FL Studio version:
+- Lead plays C5 -> D5 -> G5
+- Bass plays C3
+- Drums play kick + hat
+- Pad plays a C major chord
+
+MiniSound version:
+
+from minisound import *
+song = Song(bpm=140)
+
+lead = song.add_track("lead", pan=0.1)
+bass = song.add_track("bass", pan=-0.1)
+drums = song.add_track("drums", send=0.4)
+pad  = song.add_track("pad", gain=0.6)
+
+lead.note("C5")
+lead.note("D5")
+lead.note("G5")
+
+bass.note("C3", dur=2, wave="tri")
+
+drums.sample("kick.wav")
+drums.sample("hihat.wav", vol=0.3)
+
+pad.chord("C4 E4 G4", dur=4, wave="tri")
+song.save("out.wav")

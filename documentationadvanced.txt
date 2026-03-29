@@ -1,0 +1,288 @@
+MiniSound Advanced Documentation
+================================
+
+This document explains advanced MiniSound techniques for users who already
+understand the basics. It covers layered synthesis, detuning, chorus,
+multi-track arrangement, arpeggiation, pads, bass design, and full-song
+construction.
+
+All examples assume:
+
+    from minisound import Song
+
+
+------------------------------------------------------------
+1. Creating a Song
+------------------------------------------------------------
+
+A Song defines global settings such as BPM, sample rate, and master FX.
+
+Example:
+
+    song = Song(bpm=84, sr=44100)
+
+This creates a project at 84 BPM with a 44.1 kHz sample rate.
+
+
+------------------------------------------------------------
+2. Adding Tracks (Mixer Channels)
+------------------------------------------------------------
+
+Tracks behave like mixer channels in a DAW. Each track has:
+
+- gain (volume)
+- pan (left/right)
+- send (amount routed to global reverb)
+- its own event timeline
+
+Example:
+
+    pads = song.add_track(name="pads", gain=0.55, pan=0.0, send=0.45)
+
+
+------------------------------------------------------------
+3. Pads with Layered Chords
+------------------------------------------------------------
+
+MiniSound supports layered synthesis inside a single chord or note.
+This allows wide, lush pads similar to stacking plugins in a DAW.
+
+Example chord progression:
+
+    chords = [
+        "C4 E4 G4 B4",
+        "A3 C4 E4 G4",
+        "F3 A3 C4 E4",
+        "G3 B3 D4 F4",
+    ]
+
+Playing each chord for 4 beats with layered detuned triangles:
+
+    for ch in chords:
+        pads.chord(
+            ch,
+            dur=4.0,
+            vol=0.28,
+            wave="tri",
+            layers=[
+                {"wave": "tri", "vol": 1.0, "detune": -5, "pan": -0.1, "chorus": True},
+                {"wave": "tri", "vol": 1.0, "detune": +5, "pan": 0.1,  "chorus": True},
+            ],
+            send=0.65,
+        )
+
+Explanation:
+- Two triangle layers are detuned left/right for width.
+- chorus=True adds stereo motion.
+- send=0.65 routes more signal to the reverb bus.
+
+
+------------------------------------------------------------
+4. Bass Design with Layered Oscillators
+------------------------------------------------------------
+
+Basslines can combine pulse and triangle waves for body and clarity.
+
+Example:
+
+    bass = song.add_track(name="bass", gain=0.55, pan=-0.1, send=0.15)
+
+    bassline = ["C2", "A1", "F1", "G1"]
+
+    for n in bassline:
+        bass.note(
+            n,
+            dur=2.0,
+            vol=0.32,
+            wave="pulse",
+            unison=1,
+            layers=[
+                {"wave": "pulse50", "vol": 0.55, "detune": -4, "pan": -0.1},
+                {"wave": "tri",     "vol": 0.35, "detune": +3, "pan": 0.1},
+            ],
+            send=0.15,
+        )
+
+Explanation:
+- pulse50 adds low-end weight
+- triangle adds mid clarity
+- slight detune and panning widen the bass subtly
+
+
+------------------------------------------------------------
+5. Arpeggiators (Advanced)
+------------------------------------------------------------
+
+MiniSound can generate arpeggios automatically.
+
+Example:
+
+    arp = song.add_track(name="arp", gain=0.5, pan=0.1, send=0.25)
+
+    arp.arp(
+        "C5 E5 G5 B5",
+        steps=16,
+        dur=0.5,
+        vol=0.22,
+        wave="pulse",
+        layers=[
+            {"wave": "pulse", "vol": 1.0, "detune": -3, "pan": -0.1, "chorus": True},
+            {"wave": "tri",   "vol": 0.45, "detune": +3, "pan": 0.1},
+        ],
+        send=0.3,
+    )
+
+Explanation:
+- steps=16 means the arp cycles through the notes 16 times.
+- dur=0.5 means each step lasts half a beat.
+- Layering adds shimmer and stereo width.
+
+
+------------------------------------------------------------
+6. Lead Synthesis with Chorus and Layering
+------------------------------------------------------------
+
+Leads can combine pulse and triangle waves for a bright, expressive tone.
+
+Example melody:
+
+    lead = song.add_track(name="lead", gain=0.6, pan=0.05, send=0.35)
+
+    melody = [
+        ("E5", 1.0),
+        ("D5", 1.0),
+        ("C5", 2.0),
+        ("G4", 1.0),
+        ("A4", 1.0),
+        ("B4", 2.0),
+    ]
+
+    for n, d in melody:
+        lead.note(
+            n,
+            dur=d,
+            vol=0.38,
+            wave="pulse",
+            unison=1,
+            chorus=True,
+            layers=[
+                {"wave": "pulse50", "vol": 0.55, "detune": -5, "pan": -0.1},
+                {"wave": "tri",     "vol": 0.35, "detune": +5, "pan": 0.1},
+            ],
+            send=0.45,
+        )
+
+Explanation:
+- chorus=True adds stereo motion to the main layer.
+- pulse50 + tri layering creates a hybrid analog/digital tone.
+- detune spreads the sound left/right.
+
+
+------------------------------------------------------------
+7. Rendering and Exporting
+------------------------------------------------------------
+
+When all tracks are defined, export the final WAV:
+
+    song.save("clean_track.wav")
+    print("Rendered clean_track.wav")
+
+The master bus automatically applies:
+
+- tape saturation
+- oversampling
+- anti-alias filtering
+- soft-knee compression
+- stereo widening
+- lookahead limiting
+- RMS normalization
+
+------------------------------------------------------------
+8. Advanced Example
+------------------------------------------------------------
+song = Song(bpm=84, sr=44100)
+
+pads = song.add_track(name="pads", gain=0.55, pan=0.0, send=0.45)
+
+chords = [
+    "C4 E4 G4 B4",
+    "A3 C4 E4 G4",
+    "F3 A3 C4 E4",
+    "G3 B3 D4 F4",
+]
+
+for ch in chords:
+    pads.chord(
+        ch,
+        dur=4.0,
+        vol=0.28,
+        wave="tri",
+        layers=[
+            {"wave": "tri", "vol": 1.0, "detune": -5, "pan": -0.1, "chorus": True},
+            {"wave": "tri", "vol": 1.0, "detune": +5, "pan": 0.1, "chorus": True},
+        ],
+        send=0.65,
+    )
+
+
+bass = song.add_track(name="bass", gain=0.55, pan=-0.1, send=0.15)
+
+bassline = ["C2", "A1", "F1", "G1"]
+for n in bassline:
+    bass.note(
+        n,
+        dur=2.0,
+        vol=0.32,
+        wave="pulse",
+        unison=1,
+        layers=[
+            {"wave": "pulse50", "vol": 0.55, "detune": -4, "pan": -0.1},
+            {"wave": "tri", "vol": 0.35, "detune": +3, "pan": 0.1},
+        ],
+        send=0.15,
+    )
+
+
+arp = song.add_track(name="arp", gain=0.5, pan=0.1, send=0.25)
+
+arp.arp(
+    "C5 E5 G5 B5",
+    steps=16,
+    dur=0.5,
+    vol=0.22,
+    wave="pulse",
+    layers=[
+        {"wave": "pulse", "vol": 1.0, "detune": -3, "pan": -0.1, "chorus": True},
+        {"wave": "tri", "vol": 0.45, "detune": +3, "pan": 0.1},
+    ],
+    send=0.3,
+)
+
+lead = song.add_track(name="lead", gain=0.6, pan=0.05, send=0.35)
+
+melody = [
+    ("E5", 1.0),
+    ("D5", 1.0),
+    ("C5", 2.0),
+    ("G4", 1.0),
+    ("A4", 1.0),
+    ("B4", 2.0),
+]
+
+for n, d in melody:
+    lead.note(
+        n,
+        dur=d,
+        vol=0.38,
+        wave="pulse",
+        unison=1,
+        chorus=True,
+        layers=[
+            {"wave": "pulse50", "vol": 0.55, "detune": -5, "pan": -0.1},
+            {"wave": "tri", "vol": 0.35, "detune": +5, "pan": 0.1},
+        ],
+        send=0.45,
+    )
+
+song.save("clean_track.wav")
+print("Rendered clean_track.wav")
