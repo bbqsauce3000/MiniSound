@@ -32,6 +32,20 @@ MiniSound includes:
 - WAV rendering and export
 
 ---
+## Example
+```
+from minisound import *
+
+song = Song(bpm=140)
+lead = song.add_track("lead")
+
+lead.note("C5")
+lead.note("D5")
+lead.note("G5")
+
+song.save("example.wav")
+```
+---
 
 ## Documentation
 
