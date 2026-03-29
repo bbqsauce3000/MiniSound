@@ -41,7 +41,10 @@ Detailed explanations and advanced usage notes are provided in:
 - `documentationadvanced.txt`
 
 ---
+## Features to add...
+A actual, proper DSL?
 
+---
 ## License
 
 This project is released under **The Unlicense**.  
